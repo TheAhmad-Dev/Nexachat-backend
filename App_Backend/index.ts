@@ -10,6 +10,7 @@ import { env } from "./config/env.js";
 import authRoutes from "./routes/auth.routes.js";
 import messageRoutes from "./routes/message.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
+import { startPushReceiptWorker } from "./services/notification.service.js";
 
 import { InitializeTheSocekt } from "./socket/socket.js";
 
@@ -96,6 +97,7 @@ InitializeTheSocekt(myserver);
 
 try {
   await myconnectedDatabase();
+  startPushReceiptWorker();
 
   myserver.listen(PORT, "0.0.0.0", () => {
     console.log(`Server is running on port ${PORT}`);

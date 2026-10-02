@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import Conversation from "../utils/models/coversationSchema.js";
 // import Message from "../models/Message.js";
 import Message from "../utils/models/Message.js";
+import { sendChatMessagePush } from "../services/notification.service.js";
 
 type ConversationType = "direct" | "group";
 
@@ -680,6 +681,21 @@ export function RegisterChatEvents(
             "newMessage",
             response
           );
+
+        const recipientIds = conversation.participants
+          .map((participantId) => String(participantId))
+          .filter((participantId) => participantId !== userId);
+        void sendChatMessagePush({
+          recipientUserIds: recipientIds,
+          conversationId: data.conversationId,
+          conversationType: conversation.type,
+          conversationName: conversation.name,
+          senderId: userId,
+          senderName: sender.name,
+          messageId: String(populatedMessage._id),
+          hasText: Boolean(content),
+          attachment: Boolean(attachment),
+        });
       } catch (error) {
         console.error(
           "New Message Error:",

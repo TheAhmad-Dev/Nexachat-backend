@@ -15,6 +15,17 @@ const getString = (value: unknown): string => {
   return typeof value === "string" ? value.trim() : "";
 };
 
+const defaultAvatarIds = [
+  "nexachat-default-avatar:avatar",
+  "nexachat-default-avatar:image1",
+  "nexachat-default-avatar:image2",
+  "nexachat-default-avatar:image3",
+  "nexachat-default-avatar:image4",
+] as const;
+
+const selectDefaultAvatar = (): string =>
+  defaultAvatarIds[Math.floor(Math.random() * defaultAvatarIds.length)]!;
+
 const isDuplicateKeyError = (error: unknown): boolean => {
   return (
     typeof error === "object" &&
@@ -37,7 +48,7 @@ export const registerUser = async (
   const normalizedEmail = getString(email).toLowerCase();
   const normalizedName = getString(name);
   const rawPassword = getString(password);
-  const normalizedAvatar = getString(avatar);
+  const normalizedAvatar = getString(avatar) || selectDefaultAvatar();
 
   // Validate required fields
   if (!normalizedEmail || !normalizedName || !rawPassword) {

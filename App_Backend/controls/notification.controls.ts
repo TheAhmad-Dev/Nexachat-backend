@@ -1,6 +1,4 @@
 import type { Response } from "express";
-
-// import User from "../models/User.js";
 import User from "../utils/models/User.js";
 import type { AuthenticatedRequest } from "../middleware/auth.middleware.js";
 
@@ -62,6 +60,12 @@ export const savePushToken = async (
      *
      * $addToSet prevents duplicate tokens.
      */
+    // A device token belongs to the account currently using this device.
+    await User.updateMany(
+      { _id: { $ne: userId }, pushTokens: pushToken },
+      { $pull: { pushTokens: pushToken } }
+    );
+
     const user = await User.findByIdAndUpdate(
       userId,
       {
@@ -104,5 +108,31 @@ export const savePushToken = async (
       success: false,
       msg: "Server Error",
     });
+  }
+};
+
+export const removePushToken = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  const userId = req.userId;
+  const { pushToken } = req.body;
+
+  if (!userId) {
+    res.status(401).json({ success: false, msg: "Authentication required" });
+    return;
+  }
+
+  if (typeof pushToken !== "string" || !pushToken.trim()) {
+    res.status(400).json({ success: false, msg: "Push token is required" });
+    return;
+  }
+
+  try {
+    await User.updateOne({ _id: userId }, { $pull: { pushTokens: pushToken } });
+    res.json({ success: true, msg: "Push token removed successfully" });
+  } catch (error) {
+    console.error("Failed to remove push token:", error);
+    res.status(500).json({ success: false, msg: "Server Error" });
   }
 };

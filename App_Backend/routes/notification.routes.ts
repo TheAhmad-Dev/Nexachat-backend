@@ -1,6 +1,9 @@
 import { Router } from "express";
 
-import { savePushToken } from "../controls/notification.controls.js";
+import {
+  removePushToken,
+  savePushToken,
+} from "../controls/notification.controls.js";
 
 import { authenticate } from "../middleware/auth.middleware.js";
 
@@ -16,6 +19,12 @@ router.post(
   "/push-token",
   authenticate,
   savePushToken
+);
+
+router.delete(
+  "/push-token",
+  authenticate,
+  removePushToken
 );
 
 export default router;
